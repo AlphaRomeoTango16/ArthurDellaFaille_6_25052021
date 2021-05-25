@@ -1,4 +1,4 @@
-const Sauce = require('../models/sauce');
+const Sauce = require('../models/Sauce');
 const fs= require('fs');
 
 exports.createSauce = (req, res, next) => {
@@ -10,7 +10,7 @@ exports.createSauce = (req, res, next) => {
     });
     sauce.save()
         .then(() => res.status(201).json({ message: 'Sauce enregistré !'}))
-        .catch(() => res.status(400).json({ error }));
+        .catch(error => res.status(400).json({ error }));
 }
 
 exports.modifySauce = (req, res, next) => {
@@ -24,7 +24,7 @@ exports.modifySauce = (req, res, next) => {
         .catch(error => res.status(400).json({ error }));
 }
 
-exports.deleteSauce = (req, res, next) =>{
+exports.deleteSauce = (req, res, next) => {
     Sauce.findOne({ _id: req.params.id })
         .then(sauce => {
             const filename = sauce.imageUrl.split('/images/')[1];
@@ -45,6 +45,10 @@ exports.getOneSauce = (req, res, next) => {
 
 exports.getAllSauce = (req, res, next) => {
     Sauce.find()
-        .then(sauces => res.status(200).json(things))
+        .then(sauces => res.status(200).json(sauces))
         .catch(error => res.status(400).json({ error }));
+}
+
+exports.likeSauce = (req, res, next) => {
+    Sauce.findOne({ _id: req.params.id })
 }
