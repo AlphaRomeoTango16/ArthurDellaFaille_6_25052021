@@ -20,8 +20,10 @@ exports.modifySauce = (req, res, next) => {
            imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
          } : { ...req.body };
     Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
-        .then(() => res.statuts(200).json({ message: 'Sauce modifiée !'}))
-        .catch(error => res.status(400).json({ error }));
+        .then(() => res.status(200).json({ message: 'Sauce modifiée !'}))
+        .catch(error =>
+            res.status(400).json({ error })
+            );
 }
 
 exports.deleteSauce = (req, res, next) => {
@@ -51,4 +53,17 @@ exports.getAllSauce = (req, res, next) => {
 
 exports.likeSauce = (req, res, next) => {
     Sauce.findOne({ _id: req.params.id })
+        .then(sauce => {
+            const likeObject = sauce.usersLiked;
+            const dislikeObject = sauce.userDisliked;
+            if (req.body.like == +1) {
+                likeObject.push(userId);
+            } else if (req.body.like == -1) {
+                dislikeObject.push(userId);
+            } else if (req.body.like == 0) {
+                likeObject.splice(1, 1);
+                dislikeObject.splice(1, 1);
+            }
+        })
+        .catch(error => res.status(500).json({ error }));
 }
