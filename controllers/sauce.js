@@ -52,24 +52,38 @@ exports.getAllSauce = (req, res, next) => {
 }
 
 exports.likeSauce = (req, res, next) => {
-    const userId = req.body.userId
-    const sauceLike = req.body.likes;
-    const sauceDislike = req.body.dislikes;
+    const userId = req.body.userId;
+    const sauceLike = req.body.like
+    const like = req.body.likes;
+    const dislike = req.body.dislikes;
     const usersLiked = req.body.usersLiked;
     const usersDisliked = req.body.usersDisliked;
+
     Sauce.findOne({ _id: req.params.id })
         .then(sauce => {
-            if (sauceLike == +1) {
-                usersLiked.push(userId);
-                sauceLike.inc(+1);
+            if (sauceLike == 1) {
+                Sauce.updateOne(
+                    {_id: req.params.id},
+                    {$push: {usersLiked: userId}, $inc: {likes: +1}}
+                )
+                .then(() => res.status(201).json({ message: 'Like enregistré !'}))
+                .catch(error => res.status(400).json({ error }));
+
             } else if (sauceLike == -1) {
-                usersDisliked.push(userId);
-                sauceDislike.inc(-1);
+                Sauce.updateOne(
+                    {_id: req.params.id},
+                    {$push: {usersDisliked: userId}, $inc: {dislikes: +1}}
+                )
+                .then(() => res.status(201).json({ message: 'Dislike enregistré !'}))
+                .catch(error => res.status(400).json({ error }));
+
             } else if (sauceLike == 0) {
-                usersLiked.push(userId);
-                usersDisliked.push(userId);
-                sauceLike.inc(0);
-                sauceDislike.inc(0);
+                Sauce.updateOne(
+                    {_id: req.params.id},
+                    {$push: {usersLiked, usersDisliked: userId}, $inc: {like, dislikes: 0}}
+                )
+                .then(() => res.status(201).json({ message: 'Pas de préférence !'}))
+                .catch(error => res.status(400).json({ error }));
             }
         })
         .catch(error => res.status(500).json({ error }));

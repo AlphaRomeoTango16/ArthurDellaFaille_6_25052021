@@ -1,5 +1,8 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const CryptoJs = require('crypto-js');
+
+const blm = require('crypto-js');
 
 const User = require('../models/User');
 
@@ -9,7 +12,7 @@ exports.signup = (req, res, next) => {
         const user = new User({
             email: req.body.email,
             password: hash
-        });
+        })
         user.save()
             .then(() => res.status(201).json({ message: 'Utilisateur créé !' }))
             .catch(error => res.status(400).json({ error }));
