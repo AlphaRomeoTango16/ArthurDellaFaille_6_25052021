@@ -54,37 +54,31 @@ exports.getAllSauce = (req, res, next) => {
 exports.likeSauce = (req, res, next) => {
     const userId = req.body.userId;
     const sauceLike = req.body.like
-    const like = req.body.likes;
-    const dislike = req.body.dislikes;
-    const usersLiked = req.body.usersLiked;
-    const usersDisliked = req.body.usersDisliked;
 
     Sauce.findOne({ _id: req.params.id })
         .then(sauce => {
             if (sauceLike == 1) {
-                Sauce.updateOne(
-                    {_id: req.params.id},
-                    {$push: {usersLiked: userId}, $inc: {likes: +1}}
-                )
-                .then(() => res.status(201).json({ message: 'Like enregistré !'}))
-                .catch(error => res.status(400).json({ error }));
+                sauce.likes += 1;
+                sauce.usersLiked.push(userId);
 
             } else if (sauceLike == -1) {
-                Sauce.updateOne(
-                    {_id: req.params.id},
-                    {$push: {usersDisliked: userId}, $inc: {dislikes: +1}}
-                )
-                .then(() => res.status(201).json({ message: 'Dislike enregistré !'}))
-                .catch(error => res.status(400).json({ error }));
+                sauce.dislikes += 1;
+                sauce.usersDisliked.push(userId);
+
 
             } else if (sauceLike == 0) {
-                Sauce.updateOne(
-                    {_id: req.params.id},
-                    {$push: {usersLiked, usersDisliked: userId}, $inc: {like, dislikes: 0}}
-                )
-                .then(() => res.status(201).json({ message: 'Pas de préférence !'}))
-                .catch(error => res.status(400).json({ error }));
+                if (sauce.usersLiked.includes(userId)) {
+                    sauce.likes -= 1;
+                    sauce.usersLiked = sauce.usersLiked.filter(id => id != userId);
+
+                } else if (sauce.usersDisliked.includes(userId)) {
+                    sauce.dislikes -= 1;
+                    sauce.usersDisliked = sauce.usersDisliked.filter(id => id != userId);
+                }
+
             }
+            sauce.save()
+            .then(sauces => res.status(200).json({ message: "Votre préférence mise à jour !"}));
         })
         .catch(error => res.status(500).json({ error }));
 }
